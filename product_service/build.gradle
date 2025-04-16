@@ -32,13 +32,17 @@ dependencies {
 	implementation("org.mapstruct:mapstruct:1.5.5.Final")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
-	// If using Lombok, enable this configuration
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 	annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 
 	implementation("org.flywaydb:flyway-core:10.10.0")
 	implementation("org.postgresql:postgresql:42.7.2")
 
 	implementation("org.flywaydb:flyway-database-postgresql:10.10.0")
+
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
