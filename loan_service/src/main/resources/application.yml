@@ -1,0 +1,19 @@
+server:
+  port: 8002
+
+spring:
+  application:
+    name: loan-service
+  r2dbc:
+    url: r2dbc:postgresql://postgres:5442/lending_app_db
+    username: postgres
+    password: pass@word1
+    driver-class-name: org.postgresql.Driver
+    properties:
+      schema: public
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka
+

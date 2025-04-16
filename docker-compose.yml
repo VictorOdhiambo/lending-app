@@ -1,0 +1,149 @@
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass@word1
+      POSTGRES_DB: lending_app_db
+    ports:
+      - "5432:5432"
+    networks:
+      - spring-cloud
+
+  discovery-service:
+    build: ./discovery_service
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    networks:
+      - spring-cloud
+
+  api-gateway:
+    build: ./gateway
+    container_name: api-gateway
+    ports:
+      - "8800:8000"
+    depends_on:
+      - discovery-service
+    # environment:
+    #   - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
+    #   - DB_HOST=postgres-db
+    #   - DB_PORT=5432
+    #   - DB_NAME=lending_app_db
+    #   - DB_USER=postgres
+    #   - DB_PASSWORD=pass@word1
+    networks:
+      - spring-cloud
+
+  product-service:
+    build: ./product_service
+    container_name: product-service
+    ports:
+      - "8801:8003"
+    depends_on:
+      - discovery-service
+      - postgres-db
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_NAME=lending_app_db
+      - DB_USER=postgres
+      - DB_PASSWORD=pass@word1
+    networks:
+      - spring-cloud
+
+  customer-service:
+    build: ./customer_service
+    container_name: customer-service
+    ports:
+      - "8802:8001"
+    depends_on:
+      - discovery-service
+      - postgres-db
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_NAME=lending_app_db
+      - DB_USER=postgres
+      - DB_PASSWORD=pass@word1
+    networks:
+      - spring-cloud
+
+  loan-service:
+    build: ./loan_service
+    container_name: loan-service
+    ports:
+      - "8803:8002"
+    depends_on:
+      - discovery-service
+      - postgres-db
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_NAME=lending_app_db
+      - DB_USER=postgres
+      - DB_PASSWORD=pass@word1
+    networks:
+      - spring-cloud
+
+  notification-service:
+    build: ./notification_service
+    container_name: notification-service
+    ports:
+      - "8804:8004"
+    depends_on:
+      - discovery-service
+      - postgres-db
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_NAME=lending_app_db
+      - DB_USER=postgres
+      - DB_PASSWORD=pass@word1
+    networks:
+      - spring-cloud
+
+  scheduler-service:
+    build: ./scheduler_service
+    container_name: scheduler-service
+    ports:
+      - "8805:8005"
+    depends_on:
+      - discovery-service
+      - postgres-db
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_NAME=lending_app_db
+      - DB_USER=postgres
+      - DB_PASSWORD=pass@word1
+    networks:
+      - spring-cloud
+
+  report-service:
+    build: ./report_service
+    container_name: report-service
+    ports:
+      - "8806:8006"
+    depends_on:
+      - discovery-service
+      - postgres-db
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
+      - DB_HOST=postgres-db
+      - DB_PORT=5432
+      - DB_NAME=lending_app_db
+      - DB_USER=postgres
+      - DB_PASSWORD=pass@word1
+    networks:
+      - spring-cloud
+
+networks:
+  spring-cloud:
+    driver: bridge

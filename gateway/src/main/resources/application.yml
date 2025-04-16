@@ -1,0 +1,39 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/product/**
+        - id: customer-service
+          uri: lb://customer-service
+          predicates:
+            - Path=/customer/**
+        - id: loan-service
+          uri: lb://loan-service
+          predicates:
+              - Path=/loan/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification/**
+        - id: scheduler-service
+          uri: lb://scheduler-service
+          predicates:
+            - Path=/scheduler/**
+        - id: report-service
+          uri: lb://report-service
+          predicates:
+            - Path=/report/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka
+
