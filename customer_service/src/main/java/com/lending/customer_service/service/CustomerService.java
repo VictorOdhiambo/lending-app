@@ -31,7 +31,7 @@ public class CustomerService implements ICustomerService {
         Double loanLimit = loanLimitScoring.scoreBasedOnAge(customerDTO);
         customer.setMaxQualifiedAmount(loanLimit);
         return customerRepository.save(customer)
-                .flatMap(persisted -> Mono.just(customerMapper.toDto(persisted)))
+                .map(customerMapper::toDto)
                 .switchIfEmpty(Mono.error(new CustomerException("Error when creating customer")));
     }
 
@@ -48,7 +48,8 @@ public class CustomerService implements ICustomerService {
                     customer.setMaxQualifiedAmount(customerDTO.maxQualifiedAmount());
                     customer.setDob(customerDTO.dob());
 
-                    return customerRepository.save(customer).flatMap(updatedCustomer -> Mono.just(customerMapper.toDto(updatedCustomer)));
+                    return customerRepository.save(customer)
+                            .map(customerMapper::toDto);
                 });
 
     }
@@ -57,13 +58,13 @@ public class CustomerService implements ICustomerService {
     public Mono<CustomerDTO> findCustomerById(UUID customerId) {
         return customerRepository.findById(customerId)
                 .switchIfEmpty(Mono.error(new CustomerException("Error retrieving customer details")))
-                .flatMap(persisted -> Mono.just(customerMapper.toDto(persisted)));
+                .map(customerMapper::toDto);
     }
 
     @Override
     public Flux<CustomerDTO> findAll() {
         return customerRepository.findAll()
                 .switchIfEmpty(Mono.error(new CustomerException("Error retrieving customers")))
-                .flatMap(persisted -> Mono.just(customerMapper.toDto(persisted)));
+                .map(customerMapper::toDto);
     }
 }

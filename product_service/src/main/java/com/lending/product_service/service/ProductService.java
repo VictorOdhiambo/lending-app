@@ -47,7 +47,7 @@ public class ProductService implements IProductService {
     public Mono<ProductDTO> addProduct(ProductDTO productDTO) {
         Product product = productMapper.toEntity(productDTO);
         return productRepository.save(product)
-                .flatMap(persisted -> Mono.just(productMapper.toDto(persisted)))
+                .map(productMapper::toDto)
                 .switchIfEmpty(Mono.error(new ProductException("Error when creating product")));
     }
 
@@ -55,7 +55,7 @@ public class ProductService implements IProductService {
     public Mono<ChargeDTO> addCharge(ChargeDTO chargeDTO) {
         Charge charge = chargeMapper.toEntity(chargeDTO);
         return chargeRepository.save(charge)
-                .flatMap(persisted -> Mono.just(chargeMapper.toDto(persisted)))
+                .map(chargeMapper::toDto)
                 .switchIfEmpty(Mono.error(new ChargeException("Error when creating charge")));
     }
 
@@ -63,7 +63,7 @@ public class ProductService implements IProductService {
     public Mono<ProductChargeMappingDTO> addProductChargeMapping(ProductChargeMappingDTO productChargeMappingDTO) {
         ProductChargeMapping productCharge = productChargeMapper.toEntity(productChargeMappingDTO);
         return productChargeMappingRepository.save(productCharge)
-                .flatMap(persisted -> Mono.just(productChargeMapper.toDto(persisted)))
+                .map(productChargeMapper::toDto)
                 .switchIfEmpty(Mono.error(new ProductChargeException("Error when creating product-charge mapping")));
     }
 
@@ -71,7 +71,7 @@ public class ProductService implements IProductService {
     public Mono<ProductDTO> findProductById(UUID productId) {
         return productRepository.findById(productId)
                 .switchIfEmpty(Mono.error(new ProductException("Error retrieving product details")))
-                .flatMap(persisted -> Mono.just(productMapper.toDto(persisted)));
+                .map(productMapper::toDto);
     }
 
     @Override
@@ -92,13 +92,13 @@ public class ProductService implements IProductService {
     public Flux<ProductDTO> findAllProducts() {
         return productRepository.findAll()
                 .switchIfEmpty(Mono.error(new ProductException("Error retrieving products")))
-                .flatMap(persisted -> Mono.just(productMapper.toDto(persisted)));
+                .map(productMapper::toDto);
     }
 
     @Override
     public Flux<ChargeDTO> findAllCharges() {
         return chargeRepository.findAll()
                 .switchIfEmpty(Mono.error(new ChargeException("Error retrieving charges")))
-                .flatMap(persisted -> Mono.just(chargeMapper.toDto(persisted)));
+                .map(chargeMapper::toDto);
     }
 }
