@@ -39,6 +39,9 @@ public class Loan {
     @Column("disbursement_amount")
     private double disbursementAmount;
 
+    @Column("repaid_amount")
+    private double repaidAmount;
+
     @Column("negotiated_installment")
     private int negotiatedInstallment;
 
@@ -54,12 +57,12 @@ public class Loan {
     @Column("end_date")
     private LocalDateTime endDate;
 
-    @Column("next_repayment_date")
-    private LocalDateTime nextRepaymentDate;
-
     @Column("disbursement_date")
     private LocalDateTime disbursementDate;
 
     @Column("cleared_date")
     private LocalDateTime clearedDate;
+
+    @Column("created_date")
+    private LocalDateTime createdDate;
 }

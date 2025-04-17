@@ -1,5 +1,8 @@
 package com.lending.loan_service.shared;
 
+import lombok.Getter;
+
+@Getter
 public enum PaymentFrequency {
     DAILY(1),
     WEEKLY(7),
@@ -14,7 +17,4 @@ public enum PaymentFrequency {
         this.value = value;
     }
 
-    public int getValue() {
-        return value;
-    }
 }

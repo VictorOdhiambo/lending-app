@@ -6,10 +6,12 @@ import com.lending.customer_service.mapper.CustomerMapper;
 import com.lending.customer_service.model.Customer;
 import com.lending.customer_service.repository.ICustomerRepository;
 import com.lending.customer_service.service.contracts.ICustomerService;
+import com.lending.customer_service.shared.CustomerCreatedEvent;
 import com.lending.customer_service.utils.LoanLimitScoring;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 import java.util.UUID;
 
@@ -18,12 +20,16 @@ public class CustomerService implements ICustomerService {
     private final ICustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
     private final LoanLimitScoring loanLimitScoring;
+    private final Sinks.Many<CustomerCreatedEvent> customerCreatedSink;
 
-    public CustomerService(ICustomerRepository customerRepository, CustomerMapper customerMapper, LoanLimitScoring loanLimitScoring){
+    public CustomerService(ICustomerRepository customerRepository, Sinks.Many<CustomerCreatedEvent> customerCreatedSink,
+                           CustomerMapper customerMapper, LoanLimitScoring loanLimitScoring) {
         this.customerRepository = customerRepository;
+        this.customerCreatedSink = customerCreatedSink;
         this.customerMapper = customerMapper;
         this.loanLimitScoring = loanLimitScoring;
     }
+
     @Override
     public Mono<CustomerDTO> addCustomer(CustomerDTO customerDTO) {
         Customer customer = customerMapper.toEntity(customerDTO);
@@ -32,7 +38,15 @@ public class CustomerService implements ICustomerService {
         customer.setMaxQualifiedAmount(loanLimit);
         return customerRepository.save(customer)
                 .map(customerMapper::toDto)
-                .switchIfEmpty(Mono.error(new CustomerException("Error when creating customer")));
+                .switchIfEmpty(Mono.error(new CustomerException("Error when creating customer")))
+                .doOnSuccess(savedCustomer -> {
+                    CustomerCreatedEvent event = new CustomerCreatedEvent(
+                            savedCustomer.id().toString(),
+                            savedCustomer.firstName(),
+                            savedCustomer.email()
+                    );
+                    customerCreatedSink.tryEmitNext(event);
+                });
     }
 
     @Override
@@ -49,7 +63,16 @@ public class CustomerService implements ICustomerService {
                     customer.setDob(customerDTO.dob());
 
                     return customerRepository.save(customer)
-                            .map(customerMapper::toDto);
+                            .doOnSuccess(
+                                    savedCustomer -> {
+                                        CustomerCreatedEvent event = new CustomerCreatedEvent(
+                                                savedCustomer.getId().toString(),
+                                                savedCustomer.getFirstName() + " " + savedCustomer.getFirstName(),
+                                                savedCustomer.getEmail()
+                                        );
+                                        customerCreatedSink.tryEmitNext(event);
+                                    }
+                            ).map(customerMapper::toDto);
                 });
 
     }

@@ -12,6 +12,46 @@ spring:
     properties:
       schema: public
 
+rabbitmq:
+  host: ${RABBITMQ_HOST:localhost}
+  port: ${RABBITMQ_PORT:5672}
+  username: ${RABBITMQ_USERNAME:guest}
+  password: ${RABBITMQ_PASSWORD:guest}
+  connection-timeout: 5000
+  listener:
+    simple:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+        multiplier: 2
+        max-interval: 10000
+  exchange:
+    loan: loan-exchange
+  queue:
+    loan-processing: loan-processing-queue
+    loan-approval: loan-approval-queue
+    loan-disbursement: loan-disbursement-queue
+  routing-key:
+    process-loan: process.loan
+    approve-loan: approve.loan
+    disburse-loan: disburse.loan
+
+app:
+  scheduler:
+    overdue-loan-check:
+      cron: 0 0 1 * * ?  # Run at 1 AM every day
+    due-date-reminder:
+      cron: 0 0 9 * * ?  # Run at 9 AM every day
+  loan-service:
+    base-url: http://${LOAN_SERVICE_HOST:loan-service}:${LOAN_SERVICE_PORT:8803}/api
+  notification-service:
+    base-url: http://${NOTIFICATION_SERVICE_HOST:notification-service}:${NOTIFICATION_SERVICE_PORT:8804}/api
+
+loan:
+  application:
+    expiry-days: 7
+
 eureka:
   client:
     service-url:

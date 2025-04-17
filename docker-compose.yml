@@ -11,6 +11,23 @@ services:
     networks:
       - spring-cloud
 
+  # RabbitMQ message broker
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI port
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   discovery-service:
     build: ./discovery_service
     container_name: discovery-service
@@ -44,6 +61,7 @@ services:
     depends_on:
       - discovery-service
       - postgres-db
+      - rabbitmq
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
       - DB_HOST=postgres-db
@@ -51,6 +69,7 @@ services:
       - DB_NAME=lending_app_db
       - DB_USER=postgres
       - DB_PASSWORD=pass@word1
+      - SPRING_RABBITMQ_HOST=rabbitmq
     networks:
       - spring-cloud
 
@@ -62,6 +81,7 @@ services:
     depends_on:
       - discovery-service
       - postgres-db
+      - rabbitmq
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
       - DB_HOST=postgres-db
@@ -69,6 +89,7 @@ services:
       - DB_NAME=lending_app_db
       - DB_USER=postgres
       - DB_PASSWORD=pass@word1
+      - SPRING_RABBITMQ_HOST=rabbitmq
     networks:
       - spring-cloud
 
@@ -80,6 +101,7 @@ services:
     depends_on:
       - discovery-service
       - postgres-db
+      - rabbitmq
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
       - DB_HOST=postgres-db
@@ -87,6 +109,7 @@ services:
       - DB_NAME=lending_app_db
       - DB_USER=postgres
       - DB_PASSWORD=pass@word1
+      - SPRING_RABBITMQ_HOST=rabbitmq
     networks:
       - spring-cloud
 
@@ -98,6 +121,7 @@ services:
     depends_on:
       - discovery-service
       - postgres-db
+      - rabbitmq
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
       - DB_HOST=postgres-db
@@ -105,26 +129,27 @@ services:
       - DB_NAME=lending_app_db
       - DB_USER=postgres
       - DB_PASSWORD=pass@word1
+      - SPRING_RABBITMQ_HOST=rabbitmq
     networks:
       - spring-cloud
 
-  scheduler-service:
-    build: ./scheduler_service
-    container_name: scheduler-service
-    ports:
-      - "8805:8005"
-    depends_on:
-      - discovery-service
-      - postgres-db
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
-      - DB_HOST=postgres-db
-      - DB_PORT=5432
-      - DB_NAME=lending_app_db
-      - DB_USER=postgres
-      - DB_PASSWORD=pass@word1
-    networks:
-      - spring-cloud
+#   scheduler-service:
+#     build: ./scheduler_service
+#     container_name: scheduler-service
+#     ports:
+#       - "8805:8005"
+#     depends_on:
+#       - discovery-service
+#       - postgres-db
+#     environment:
+#       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka
+#       - DB_HOST=postgres-db
+#       - DB_PORT=5432
+#       - DB_NAME=lending_app_db
+#       - DB_USER=postgres
+#       - DB_PASSWORD=pass@word1
+#     networks:
+#       - spring-cloud
 
   report-service:
     build: ./report_service

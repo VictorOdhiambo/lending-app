@@ -27,6 +27,8 @@ public record LoanDTO(
 
         double disbursementAmount,
 
+        double repaidAmount,
+
         @NotNull
         @Positive(message = "Negotiated installment should be greater than zero")
         int negotiatedInstallment,
@@ -40,10 +42,10 @@ public record LoanDTO(
 
         LocalDateTime endDate,
 
-        LocalDateTime nextRepaymentDate,
-
         LocalDateTime disbursementDate,
 
-        LocalDateTime clearedDate
+        LocalDateTime clearedDate,
+
+        LocalDateTime createdDate
 ) {
 }

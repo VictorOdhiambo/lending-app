@@ -1,4 +1,4 @@
-# Lending Platform - Microservices with PostgreSQL
+# Lending App - Spring boot Microservices with PostgreSQL
 
 This project consists of multiple Spring Boot microservices orchestrated with Docker Compose and connected to a shared PostgreSQL database. Services include:
 

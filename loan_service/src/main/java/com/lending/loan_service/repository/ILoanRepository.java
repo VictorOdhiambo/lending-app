@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface ILoanRepository extends ReactiveCrudRepository<Loan, UUID> {
     Flux<Loan> findByCustomerId(UUID customerId);
+    Flux<Loan> findByStatus(String status);
 }

@@ -5,6 +5,7 @@ import com.lending.loan_service.dto.RepaymentRequestDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.sql.Struct;
 import java.util.UUID;
 
 public interface ILoanService {
@@ -54,4 +55,10 @@ public interface ILoanService {
      * @return Flux<LoanDTO>
      */
     Flux<LoanDTO> findOverdueLoans();
+
+    Mono<LoanDTO> processLoan(String loanId);
+
+    Mono<LoanDTO> approveLoan(LoanDTO loanDTO);
+
+    public Mono<LoanDTO> disburseLoan(LoanDTO loanDTO);
 }

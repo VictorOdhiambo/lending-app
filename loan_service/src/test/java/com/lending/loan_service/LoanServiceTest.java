@@ -50,13 +50,14 @@ class LoanServiceTest {
         customerId = UUID.randomUUID();
         productId = UUID.randomUUID();
 
-        loan = new Loan(loanId, productId, customerId, "OPEN", 1000, 100, 900, 1
+        loan = new Loan(loanId, productId, customerId, "OPEN", 1000, 100, 900, 0, 1
         ,"MONTHLY", LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now().plusMonths(1),
                 LocalDateTime.now().plusMonths(1), LocalDateTime.now(), LocalDateTime.now().plusMonths(2));
 
         loanDTO = new LoanDTO(loan.getId(), loan.getProductId(), loan.getCustomerId(),
                 loan.getLoanStatus(), loan.getAppliedAmount(), loan.getInterestAmount(),
-                loan.getDisbursementAmount(), loan.getNegotiatedInstallment(), loan.getPaymentFrequency(),
+                loan.getDisbursementAmount(), loan.getRepaidAmount(), loan.getNegotiatedInstallment(),
+                loan.getPaymentFrequency(),
                 loan.getStartDate(), loan.getDueDate(), loan.getEndDate(), loan.getNextRepaymentDate(), loan.getDisbursementDate(), loan.getClearedDate());
     }
 
