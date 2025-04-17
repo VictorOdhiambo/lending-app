@@ -16,3 +16,18 @@ eureka:
     service-url:
       defaultZone: http://discovery-service:8761/eureka
 
+loan:
+  scoring:
+    rules:
+      - minAge: 18
+        maxAge: 25
+        limit: 1000
+      - minAge: 26
+        maxAge: 35
+        limit: 5000
+      - minAge: 36
+        maxAge: 50
+        limit: 20000
+      - minAge: 51
+        maxAge: 200
+        limit: 75000
