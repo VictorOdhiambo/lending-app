@@ -10,15 +10,15 @@ spring:
         - id: product-service
           uri: lb://product-service
           predicates:
-            - Path=/api/product/**
+            - Path=/product/**
         - id: customer-service
           uri: lb://customer-service
           predicates:
-            - Path=/api/customer/**
+            - Path=/customer/**
         - id: loan-service
           uri: lb://loan-service
           predicates:
-              - Path=/api/loan/**
+              - Path=/loan/**
         - id: notification-service
           uri: lb://notification-service
           predicates:

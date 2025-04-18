@@ -47,7 +47,7 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.findCustomerById(UUID.fromString(id)));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/all")
     public ResponseEntity<Flux<CustomerDTO>> findAll(){
         return ResponseEntity.ok(customerService.findAll());
     }

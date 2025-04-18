@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -34,6 +35,8 @@ class LoanServiceTest {
     private LoanMapper loanMapper;
     @Mock
     private RepaymentRequestMapper repaymentRequestMapper;
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     private LoanService loanService;
@@ -50,20 +53,19 @@ class LoanServiceTest {
         customerId = UUID.randomUUID();
         productId = UUID.randomUUID();
 
-        loan = new Loan(loanId, productId, customerId, "OPEN", 1000, 100, 900, 0, 1
-        ,"MONTHLY", LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now().plusMonths(1),
-                LocalDateTime.now().plusMonths(1), LocalDateTime.now(), LocalDateTime.now().plusMonths(2));
+        loan = new Loan(loanId, productId, customerId, "OPEN", 1000, 100, 900, 0, 1,
+                "MONTHLY", LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now().plusMonths(1),
+                LocalDateTime.now().plusMonths(1), LocalDateTime.now().plusMonths(2), LocalDateTime.now());
 
         loanDTO = new LoanDTO(loan.getId(), loan.getProductId(), loan.getCustomerId(),
                 loan.getLoanStatus(), loan.getAppliedAmount(), loan.getInterestAmount(),
                 loan.getDisbursementAmount(), loan.getRepaidAmount(), loan.getNegotiatedInstallment(),
-                loan.getPaymentFrequency(),
-                loan.getStartDate(), loan.getDueDate(), loan.getEndDate(), loan.getNextRepaymentDate(), loan.getDisbursementDate(), loan.getClearedDate());
+                loan.getPaymentFrequency(), loan.getStartDate(), loan.getDueDate(), loan.getEndDate(),
+                loan.getDisbursementDate(), loan.getClearedDate(), loan.getCreatedDate());
     }
 
     @Test
     void addLoan_success() {
-
         when(loanMapper.toEntity(loanDTO)).thenReturn(loan);
         when(loanRepository.save(loan)).thenReturn(Mono.just(loan));
         when(loanMapper.toDto(loan)).thenReturn(loanDTO);
@@ -88,7 +90,8 @@ class LoanServiceTest {
     @Test
     void editLoan_success() {
         loan.setLoanStatus("OVERDUE");
-        when(loanRepository.findById(loanId).thenReturn(Mono.just(loan)));
+
+        when(loanRepository.findById(loanId)).thenReturn(Mono.just(loan));
         when(loanRepository.save(loan)).thenReturn(Mono.just(loan));
         when(loanMapper.toDto(loan)).thenReturn(loanDTO);
 
@@ -109,7 +112,6 @@ class LoanServiceTest {
 
     @Test
     void findLoansByCustomerId_success() {
-
         when(loanRepository.findByCustomerId(customerId)).thenReturn(Flux.just(loan));
         when(loanMapper.toDto(loan)).thenReturn(loanDTO);
 
@@ -142,4 +144,3 @@ class LoanServiceTest {
                 .verifyComplete();
     }
 }
-

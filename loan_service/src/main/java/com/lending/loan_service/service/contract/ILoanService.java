@@ -60,5 +60,7 @@ public interface ILoanService {
 
     Mono<LoanDTO> approveLoan(LoanDTO loanDTO);
 
-    public Mono<LoanDTO> disburseLoan(LoanDTO loanDTO);
+    Mono<LoanDTO> repayLoan(RepaymentRequestDTO loanDTO);
+
+    Mono<LoanDTO> disburseLoan(LoanDTO loanDTO);
 }

@@ -1,6 +1,7 @@
 package com.lending.loan_service.messaging;
 
 import com.lending.loan_service.dto.LoanDTO;
+import com.lending.loan_service.dto.RepaymentRequestDTO;
 import com.lending.loan_service.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,16 @@ public class LoanMessageListener {
                 .doOnSuccess(loan -> log.info("Successfully disbursed loan: {}", loanDTO.id()))
                 .doOnError(e -> log.error("Error disbursing loan {}: {}",
                         loanDTO.id(), e.getMessage()))
+                .subscribe();
+    }
+
+    @RabbitListener(queues = "${rabbitmq.queue.loan-repayment}")
+    public void handleLoanRepayment(RepaymentRequestDTO repaymentRequestDTO) {
+        log.info("Received repayment request for loan ID: {}", repaymentRequestDTO.loanId());
+        loanService.repayLoan(repaymentRequestDTO)
+                .doOnSuccess(loan -> log.info("Successfully repaid loan: {}",  repaymentRequestDTO.loanId()))
+                .doOnError(e -> log.error("Error repaying loan {}: {}",
+                        repaymentRequestDTO.loanId(), e.getMessage()))
                 .subscribe();
     }
 }

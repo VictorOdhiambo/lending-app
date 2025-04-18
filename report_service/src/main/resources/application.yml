@@ -5,12 +5,12 @@ spring:
   application:
     name: report-service
   r2dbc:
-    url: r2dbc:postgresql://postgres:5442/lending_app_db
-    username: postgres
-    password: pass@word1
-    driver-class-name: org.postgresql.Driver
-    properties:
-      schema: public
+    url: r2dbc:postgresql://postgres-db:5432/lending_app_db
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:pass@word1}
+    pool:
+      initial-size: 5
+      max-size: 20
 
 eureka:
   client:

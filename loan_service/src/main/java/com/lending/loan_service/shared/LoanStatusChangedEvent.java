@@ -1,4 +1,4 @@
-package com.lending.notification_service.shared;
+package com.lending.loan_service.shared;
 
 import lombok.Getter;
 import lombok.Setter;

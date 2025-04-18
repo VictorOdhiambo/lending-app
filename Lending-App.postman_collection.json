@@ -1,0 +1,452 @@
+{
+	"info": {
+		"_postman_id": "68e29506-b38a-47a2-812c-f5ec5e69aba6",
+		"name": "Lending-App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "7900800"
+	},
+	"item": [
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  //\"id\": \"e7c9c4f2-1234-4d3b-a7a9-2fc2a33e8df1\",\r\n  \"name\": \"Upesi Loan\",\r\n  \"description\": \"A micro loan targeting MSMEs.\",\r\n  \"isEnabled\": true,\r\n  \"createdDate\": \"2025-04-18T10:30:00\"\r\n}\r\n\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/product",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Charge",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  //\"id\": \"b6f5d0b4-3c12-4c8a-8d7d-1a2e8a23cdfe\",\r\n  \"name\": \"Late Payment Fee\",\r\n  \"isEnabled\": true,\r\n  \"isUpfront\": false,\r\n  \"isPenalty\": true,\r\n  \"amount\": 250.00,\r\n  \"createdDate\": \"2025-04-18T10:45:00\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/product/add-charge",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"product",
+								"add-charge"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product Charge Mapping",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  //\"id\": \"d4f1e8b9-2345-4cde-91bc-6a0b7f0e2e4a\",\r\n  \"productId\": \"36b3416d-894e-44a7-8937-d2bf9c0b0f71\",\r\n  \"chargeId\": \"75f86cb7-010d-4a8f-bff5-f19c969e07bb\",\r\n  \"createdDate\": \"2025-04-16T11:00:00\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/product/add-product-charge-mapping",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"product",
+								"add-product-charge-mapping"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find all products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8800/product/all",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8800",
+							"path": [
+								"product",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/product/ee11e732-9110-4a11-a08b-03d7e0379b6b",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"product",
+								"ee11e732-9110-4a11-a08b-03d7e0379b6b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find Product Charges",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/product/find-charges-by-product-id/ee11e732-9110-4a11-a08b-03d7e0379b6b",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"product",
+								"find-charges-by-product-id",
+								"ee11e732-9110-4a11-a08b-03d7e0379b6b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find all charges",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8800/product/find-all-charges",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8800",
+							"path": [
+								"product",
+								"find-all-charges"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Loan",
+			"item": [
+				{
+					"name": "Create Loan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  //\"id\": \"3f4b1a6e-2345-4e2f-95ab-123456789abc\",\r\n  \"productId\":\"ee11e732-9110-4a11-a08b-03d7e0379b6b\",\r\n  \"customerId\": \"c898a50f-0d19-4388-9e53-c8e583fdf7bc\",\r\n  \"loanStatus\": \"OPEN\", // OPEN, CANCELLED, OVERDUE, WRITTEN_OFF, CLEARED\r\n  \"appliedAmount\": 1000.00,\r\n  \"interestAmount\": 0,\r\n  \"disbursementAmount\": 0,\r\n  \"repaidAmount\": 0,\r\n  \"negotiatedInstallment\": 12,\r\n  \"paymentFrequency\": \"MONTHLY\", // DAILY, WEEKLY, BI_WEEKLY, MONTHLY, QUARTERLY, SEMI_ANUALLY, YEARLY\r\n  \"startDate\": null,\r\n  \"dueDate\": null,\r\n  \"endDate\": null,\r\n  \"disbursementDate\": \"2025-04-02T10:00:00\",\r\n  \"clearedDate\": null,\r\n  \"createdDate\": \"2025-04-16T11:30:00\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/loan/apply",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"loan",
+								"apply"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modify Loan",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  //\"id\": \"3f4b1a6e-2345-4e2f-95ab-123456789abc\",\r\n  \"productId\":null, // \"e7c9c4f2-1234-4d3b-a7a9-2fc2a33e8df1\",\r\n  \"customerId\": null, // \"f1b2a3c4-d5e6-7890-1234-56789abcdef0\",\r\n  \"loanStatus\": \"OPEN\", // OPEN, CANCELLED, OVERDUE, WRITTEN_OFF, CLEARED\r\n  \"appliedAmount\": 10000.00,\r\n  \"interestAmount\": 0,\r\n  \"disbursementAmount\": 0,\r\n  \"repaidAmount\": 0,\r\n  \"negotiatedInstallment\": 12,\r\n  \"paymentFrequency\": \"MONTHLY\", // DAILY, WEEKLY, BI_WEEKLY, MONTHLY, QUARTERLY, SEMI_ANUALLY, YEARLY\r\n  \"startDate\": null,\r\n  \"dueDate\": null,\r\n  \"endDate\": null,\r\n  \"disbursementDate\": \"2025-04-02T10:00:00\",\r\n  \"clearedDate\": null,\r\n  \"createdDate\": \"2025-04-16T11:30:00\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8800/loan/3f4b1a6e-2345-4e2f-95ab-123456789abc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8800",
+							"path": [
+								"loan",
+								"3f4b1a6e-2345-4e2f-95ab-123456789abc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Repay Loan",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  //\"id\": \"9c3e2d1b-4567-89ab-cdef-234567890abc\",\r\n  \"customerId\": \" c898a50f-0d19-4388-9e53-c8e583fdf7bc\",\r\n  \"loanId\": \" e743ffc9-c78b-49cd-b6bc-fe2dc72e3b69 \",\r\n  \"amount\": 500.00,\r\n  \"status\": \"PENDING\",\r\n  \"createdDate\": \"2025-04-16T12:15:00\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8800/loan/repay-loan",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8800",
+							"path": [
+								"loan",
+								"repay-loan"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Customer",
+			"item": [
+				{
+					"name": "Create Customer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  //\"id\": \"1e2d3c4b-5678-90ab-cdef-1234567890ab\",\r\n  \"firstName\": \"Victor\",\r\n  \"lastName\": \"Omondi\",\r\n  \"identityNumber\": \"12345678\",\r\n  \"phoneNumber\": \"+254712345678\",\r\n  \"email\": \"victor.omondi@example.com\",\r\n  \"dob\": \"1995-06-15\",\r\n  \"prequalifiedAmount\": 50000.00,\r\n  \"maxQualifiedAmount\": 100000.00,\r\n  \"createdDate\": \"2025-04-16T12:00:00\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/customer",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modify Customer",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    // \"id\": \"84c8219b-779e-4d5c-b040-bee0bcdc6eb9\",\r\n    \"firstName\": \"Carol\",\r\n    \"lastName\": \"Njeri\",\r\n    \"identityNumber\": \"ID10293847\",\r\n    \"phoneNumber\": \"0734567890\",\r\n    \"email\": \"carol_update@example.com\",\r\n    \"dob\": \"1995-03-22\",\r\n    \"prequalifiedAmount\": 1500.0,\r\n    \"maxQualifiedAmount\": 3500.0,\r\n    \"createdDate\": \"2025-04-18T06:33:37.775121\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/customer/84c8219b-779e-4d5c-b040-bee0bcdc6eb9",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customer",
+								"84c8219b-779e-4d5c-b040-bee0bcdc6eb9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find customer by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/customer/84c8219b-779e-4d5c-b040-bee0bcdc6eb9",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customer",
+								"84c8219b-779e-4d5c-b040-bee0bcdc6eb9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find all customers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/customer/all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"customer",
+								"all"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notification",
+			"item": [
+				{
+					"name": "Create Notification",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n // \"id\": \"a9d1e6f7-5c3e-4b2e-8a1f-3b2a7c9f0e1d\",\r\n  \"customerId\": \"f1b2a3c4-d5e6-7890-1234-56789abcdef0\",\r\n  \"type\": \"SMS\",\r\n  \"message\": \"Your loan payment is due tomorrow.\",\r\n  \"status\": \"PENDING\",\r\n  \"createdDate\": \"2025-04-16T11:15:00\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/notification",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notification"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find all pending notifications",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notification/pending",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notification",
+								"pending"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find notifications by customer id",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/notification/ee11e732-9110-4a11-a08b-03d7e0379b6b",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notification",
+								"ee11e732-9110-4a11-a08b-03d7e0379b6b"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8800",
+			"type": "string"
+		}
+	]
+}

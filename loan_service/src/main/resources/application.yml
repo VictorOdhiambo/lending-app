@@ -5,18 +5,18 @@ spring:
   application:
     name: loan-service
   r2dbc:
-    url: r2dbc:postgresql://postgres:5442/lending_app_db
-    username: postgres
-    password: pass@word1
-    driver-class-name: org.postgresql.Driver
-    properties:
-      schema: public
+    url: r2dbc:postgresql://postgres-db:5432/lending_app_db
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:pass@word1}
+    pool:
+      initial-size: 5
+      max-size: 20
 
 rabbitmq:
-  host: ${RABBITMQ_HOST:localhost}
-  port: ${RABBITMQ_PORT:5672}
-  username: ${RABBITMQ_USERNAME:guest}
-  password: ${RABBITMQ_PASSWORD:guest}
+  host: ${SPRING_RABBITMQ_HOST:rabbitmq}
+  port: ${SPRING_RABBITMQ_PORT:5672}
+  username: ${SPRING_RABBITMQ_USERNAME:guest}
+  password: ${SPRING_RABBITMQ_PASSWORD:guest}
   connection-timeout: 5000
   listener:
     simple:
@@ -28,14 +28,19 @@ rabbitmq:
         max-interval: 10000
   exchange:
     loan: loan-exchange
+    notification: notification.exchange
   queue:
     loan-processing: loan-processing-queue
     loan-approval: loan-approval-queue
     loan-disbursement: loan-disbursement-queue
+    loan-repayment: loan-repayment-queue
+    loan-status: notification.loan.status
   routing-key:
     process-loan: process.loan
     approve-loan: approve.loan
     disburse-loan: disburse.loan
+    repay-loan: loan.repayment
+    loan-status: loan.status
 
 app:
   scheduler:
@@ -44,9 +49,9 @@ app:
     due-date-reminder:
       cron: 0 0 9 * * ?  # Run at 9 AM every day
   loan-service:
-    base-url: http://${LOAN_SERVICE_HOST:loan-service}:${LOAN_SERVICE_PORT:8803}/api
+    base-url: http://${LOAN_SERVICE_HOST:loan-service}:${LOAN_SERVICE_PORT:8803}
   notification-service:
-    base-url: http://${NOTIFICATION_SERVICE_HOST:notification-service}:${NOTIFICATION_SERVICE_PORT:8804}/api
+    base-url: http://${NOTIFICATION_SERVICE_HOST:notification-service}:${NOTIFICATION_SERVICE_PORT:8804}
 
 loan:
   application:

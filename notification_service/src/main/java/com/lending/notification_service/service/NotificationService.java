@@ -9,7 +9,10 @@ import com.lending.notification_service.shared.CustomerCreatedEvent;
 import com.lending.notification_service.shared.LoanStatusChangedEvent;
 import com.lending.notification_service.shared.NotificationStatus;
 import com.lending.notification_service.shared.NotificationType;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -17,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+@Service
+@Slf4j
 public class NotificationService implements INotificationService {
     private final NotificationMapper notificationMapper;
     private final INotificationRepository notificationRepository;
@@ -90,11 +95,10 @@ public class NotificationService implements INotificationService {
         };
     }
 
-    @Bean
-    public Consumer<LoanStatusChangedEvent> processLoanStatusChanged() {
-        return event -> {
-            System.out.println("Received loan status changed event: " + event.getLoanId() +
-                    " from " + event.getPreviousStatus() + " to " + event.getNewStatus());
+    @RabbitListener(queues = "${rabbitmq.queue.loan-status}")
+    public void processLoanStatusChanged(LoanStatusChangedEvent event) {
+        log.info("Received loan status changed event: " + event.getLoanId() +
+                " from " + event.getMessage() + " to " + event.getNewStatus());
 
             String message = "";
             String type = "";
@@ -138,6 +142,18 @@ public class NotificationService implements INotificationService {
             notificationRepository.save(notificationMapper.toEntity(notificationDto))
                     .doOnSuccess(saved -> System.out.println("Notification sent to customer: " + event.getCustomerId() + " for loan: " + event.getLoanId()))
                     .subscribe();
-        };
+    }
+
+    @RabbitListener(queues = "${rabbitmq.queue.customer-created}")
+    public void handleCustomerCreatedEvent(CustomerCreatedEvent event) {
+        log.info("Received CustomerCreated event: {}", event);
+
+        Notification notification = new Notification();
+        notification.setType(NotificationType.CUSTOMER_CREATED.name());
+        notification.setMessage("Welcome " + event.getName() + " to the platform");
+        notification.setCustomerId(UUID.fromString(event.getId()));
+        notification.setStatus(NotificationStatus.PENDING.name());
+
+        notificationRepository.save(notification);
     }
 }

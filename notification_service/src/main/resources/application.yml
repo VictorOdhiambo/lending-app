@@ -5,12 +5,35 @@ spring:
   application:
     name: notification-service
   r2dbc:
-    url: r2dbc:postgresql://postgres:5442/lending_app_db
-    username: postgres
-    password: pass@word1
-    driver-class-name: org.postgresql.Driver
-    properties:
-      schema: public
+    url: r2dbc:postgresql://postgres-db:5432/lending_app_db
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:pass@word1}
+    pool:
+      initial-size: 5
+      max-size: 20
+
+rabbitmq:
+  host: ${SPRING_RABBITMQ_HOST:rabbitmq}
+  port: ${SPRING_RABBITMQ_PORT:5672}
+  username: ${SPRING_RABBITMQ_USERNAME:guest}
+  password: ${SPRING_RABBITMQ_PASSWORD:guest}
+  connection-timeout: 5000
+  listener:
+    simple:
+      retry:
+        enabled: true
+        initial-interval: 1000
+        max-attempts: 3
+        multiplier: 2
+        max-interval: 10000
+  exchange:
+    notification: notification.exchange
+  queue:
+    customer-created: notification.customer.created.queue
+    loan-status: notification.loan.status
+  routing-key:
+    customer-created: customer.created
+    loan-status: loan.status
 
 eureka:
   client:

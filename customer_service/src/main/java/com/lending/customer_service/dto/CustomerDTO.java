@@ -29,7 +29,7 @@ public record CustomerDTO(
         @NotBlank(message = "Email is required")
         String email,
 
-        @NotBlank(message = "DOB is required")
+        @NotNull(message = "DOB is required")
         LocalDate dob,
 
         @NotNull

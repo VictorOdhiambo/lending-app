@@ -12,8 +12,8 @@ import com.lending.loan_service.repository.ILoanRepository;
 import com.lending.loan_service.repository.IRepaymentRequestRepository;
 import com.lending.loan_service.service.contract.ILoanService;
 import com.lending.loan_service.shared.LoanStatus;
+import com.lending.loan_service.shared.LoanStatusChangedEvent;
 import com.lending.loan_service.shared.PaymentFrequency;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +26,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class LoanService implements ILoanService {
     private final LoanMapper loanMapper;
@@ -38,6 +37,9 @@ public class LoanService implements ILoanService {
     @Value("${rabbitmq.exchange.loan}")
     private String loanExchange;
 
+    @Value("${rabbitmq.exchange.notification}")
+    private String notificationExchange;
+
     @Value("${rabbitmq.routing-key.process-loan}")
     private String processLoanRoutingKey;
 
@@ -47,6 +49,20 @@ public class LoanService implements ILoanService {
     @Value("${rabbitmq.routing-key.disburse-loan}")
     private String disburseLoanRoutingKey;
 
+    @Value("${rabbitmq.routing-key.repay-loan}")
+    private String loanRepaymentKey;
+
+    @Value("${rabbitmq.routing-key.loan-status}")
+    private String loanStatusKey;
+
+    public LoanService(ILoanRepository loanRepository, IRepaymentRequestRepository repaymentRequestRepository,
+                       RepaymentRequestMapper repaymentRequestMapper, LoanMapper loanMapper, RabbitTemplate rabbitTemplate){
+        this.loanRepository = loanRepository;
+        this.repaymentRequestRepository = repaymentRequestRepository;
+        this.repaymentRequestMapper = repaymentRequestMapper;
+        this.loanMapper = loanMapper;
+        this.rabbitTemplate = rabbitTemplate;
+    }
 
     @Override
     public Mono<LoanDTO> addLoan(LoanDTO loanDTO) {
@@ -56,8 +72,11 @@ public class LoanService implements ILoanService {
                 .switchIfEmpty(Mono.error(new LoanException("Error when creating loan")))
                 .doOnSuccess(savedLoan -> {
                     log.info("Loan application created with ID: {}", savedLoan.id());
-                    // Queue for processing
-                    queueLoanForProcessing(savedLoan.id().toString());
+                    log.info("Queueing loan for processing: {}", savedLoan.id());
+                    rabbitTemplate.convertAndSend(loanExchange, processLoanRoutingKey, savedLoan.id());
+                    // record event
+                    rabbitTemplate.convertAndSend(notificationExchange, loanStatusKey,
+                            new LoanStatusChangedEvent(savedLoan.id().toString(), savedLoan.customerId().toString(), "", LoanStatus.OPEN.name()));
                 });
     }
 
@@ -70,9 +89,7 @@ public class LoanService implements ILoanService {
                     if (!Objects.equals(loan.getLoanStatus(), LoanStatus.OPEN.name())) {
                         return Mono.error(new IllegalStateException("Loan is not in OPEN state"));
                     }
-
                     rabbitTemplate.convertAndSend(loanExchange, approveLoanRoutingKey, loan);
-
                     return Mono.just(loanMapper.toDto(loan));
                 })
                 .doOnError(e -> log.error("Error processing loan {}: {}", loanId, e.getMessage()));
@@ -88,7 +105,8 @@ public class LoanService implements ILoanService {
                         loanRepository.findById(request.getLoanId())
                                 .flatMap(loan -> {
                                     loan.setRepaidAmount(loan.getRepaidAmount() + request.getAmount());
-                                    return loanRepository.save(loan).thenReturn(request);
+                                    return loanRepository.save(loan)
+                                            .thenReturn(request);
                                 })
                 )
                 .map(repaymentRequestMapper::toDto)
@@ -178,12 +196,35 @@ public class LoanService implements ILoanService {
                     loan.setDisbursementDate(LocalDateTime.now());
                     loan.setDisbursementAmount(loan.getAppliedAmount());
 
-                    return loanRepository.save(loan).map(loanMapper::toDto);
+                    return loanRepository.save(loan)
+                            .doOnSuccess(savedLoan -> {
+                                rabbitTemplate.convertAndSend(notificationExchange, loanStatusKey,
+                                        new LoanStatusChangedEvent(savedLoan.getId().toString(), savedLoan.getCustomerId().toString(), LoanStatus.OPEN.name(), LoanStatus.CANCELLED.name()));
+                            })
+                            .map(loanMapper::toDto);
                 })
                 .doOnError(e -> log.error("Error disbursing loan {}: {}",
                         loanDTO.id(), e.getMessage()));
     }
 
+    @Override
+    public Mono<LoanDTO> repayLoan(RepaymentRequestDTO repaymentRequestDTO){
+        log.info("Loan repayment: {}", repaymentRequestDTO.loanId());
+
+        return loanRepository.findById(repaymentRequestDTO.loanId())
+                .flatMap(loan -> {
+                    loan.setRepaidAmount(loan.getRepaidAmount() + repaymentRequestDTO.amount());
+                    return loanRepository.save(loan)
+                            .flatMap(persisted -> repaymentRequestRepository.findById(repaymentRequestDTO.id())
+                                    .flatMap(repayment -> {
+                                        repayment.setStatus("COMPLETED");
+                                        return repaymentRequestRepository.save(repayment);
+                                    }).thenReturn(loan))
+                            .map(loanMapper::toDto);
+                })
+                .doOnError(e -> log.error("Error repaying loan {}: {}",
+                        repaymentRequestDTO.loanId(), e.getMessage()));
+    }
 
     @Override
     public Flux<LoanDTO> findOverdueLoans() {
@@ -194,8 +235,4 @@ public class LoanService implements ILoanService {
                 .switchIfEmpty(Mono.error(new LoanException("No due over loans found")));
     }
 
-    private void queueLoanForProcessing(String loanId) {
-        log.info("Queueing loan for processing: {}", loanId);
-        rabbitTemplate.convertAndSend(loanExchange, processLoanRoutingKey, loanId);
-    }
 }

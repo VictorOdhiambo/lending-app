@@ -8,6 +8,8 @@ import com.lending.customer_service.repository.ICustomerRepository;
 import com.lending.customer_service.service.contracts.ICustomerService;
 import com.lending.customer_service.shared.CustomerCreatedEvent;
 import com.lending.customer_service.utils.LoanLimitScoring;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,12 +22,18 @@ public class CustomerService implements ICustomerService {
     private final ICustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
     private final LoanLimitScoring loanLimitScoring;
-    private final Sinks.Many<CustomerCreatedEvent> customerCreatedSink;
+    private final RabbitTemplate rabbitTemplate;
 
-    public CustomerService(ICustomerRepository customerRepository, Sinks.Many<CustomerCreatedEvent> customerCreatedSink,
+    @Value("${rabbitmq.exchange.notification}")
+    private String notificationExchange;
+
+    @Value("${rabbitmq.routing-key.customer-created}")
+    private String customerStatusKey;
+
+    public CustomerService(ICustomerRepository customerRepository, RabbitTemplate rabbitTemplate,
                            CustomerMapper customerMapper, LoanLimitScoring loanLimitScoring) {
         this.customerRepository = customerRepository;
-        this.customerCreatedSink = customerCreatedSink;
+        this.rabbitTemplate = rabbitTemplate;
         this.customerMapper = customerMapper;
         this.loanLimitScoring = loanLimitScoring;
     }
@@ -45,7 +53,7 @@ public class CustomerService implements ICustomerService {
                             savedCustomer.firstName(),
                             savedCustomer.email()
                     );
-                    customerCreatedSink.tryEmitNext(event);
+                    rabbitTemplate.convertAndSend(notificationExchange, customerStatusKey, event);
                 });
     }
 
@@ -70,7 +78,7 @@ public class CustomerService implements ICustomerService {
                                                 savedCustomer.getFirstName() + " " + savedCustomer.getFirstName(),
                                                 savedCustomer.getEmail()
                                         );
-                                        customerCreatedSink.tryEmitNext(event);
+                                        rabbitTemplate.convertAndSend(notificationExchange, customerStatusKey, event);
                                     }
                             ).map(customerMapper::toDto);
                 });
