@@ -22,15 +22,15 @@ spring:
         - id: notification-service
           uri: lb://notification-service
           predicates:
-            - Path=/api/notification/**
+            - Path=/notification/**
         - id: scheduler-service
           uri: lb://scheduler-service
           predicates:
-            - Path=/api/scheduler/**
+            - Path=/scheduler/**
         - id: report-service
           uri: lb://report-service
           predicates:
-            - Path=/api/report/**
+            - Path=/report/**
 
 eureka:
   client:

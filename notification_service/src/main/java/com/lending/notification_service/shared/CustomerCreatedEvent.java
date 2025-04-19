@@ -3,11 +3,12 @@ package com.lending.notification_service.shared;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Setter
 @Getter
-public class CustomerCreatedEvent {
+public class CustomerCreatedEvent implements Serializable {
     // Getters and Setters
     private String id;
     private String name;

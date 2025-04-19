@@ -140,7 +140,7 @@ public class NotificationService implements INotificationService {
                     LocalDateTime.now()
             );
             notificationRepository.save(notificationMapper.toEntity(notificationDto))
-                    .doOnSuccess(saved -> System.out.println("Notification sent to customer: " + event.getCustomerId() + " for loan: " + event.getLoanId()))
+                    .doOnSuccess(saved -> log.info("Notification sent to customer: {} for loan: {}", event.getCustomerId(), event.getLoanId()))
                     .subscribe();
     }
 
@@ -154,6 +154,10 @@ public class NotificationService implements INotificationService {
         notification.setCustomerId(UUID.fromString(event.getId()));
         notification.setStatus(NotificationStatus.PENDING.name());
 
-        notificationRepository.save(notification);
+        notificationRepository.save(notification)
+                .doOnSuccess(saved -> log.info("Successfully processed CustomerCreated event: {}", event))
+                .doOnError(error -> log.error("Failed to process CustomerCreated event: {}", event, error))
+                .subscribe();
     }
+
 }

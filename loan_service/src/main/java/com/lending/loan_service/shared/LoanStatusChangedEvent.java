@@ -3,11 +3,12 @@ package com.lending.loan_service.shared;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Setter
 @Getter
-public class LoanStatusChangedEvent {
+public class LoanStatusChangedEvent implements Serializable {
     // Getters and Setters
     private String loanId;
     private String customerId;

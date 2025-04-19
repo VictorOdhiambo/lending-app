@@ -17,11 +17,17 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.exchange.loan}")
     private String loanExchange;
 
+    @Value("${rabbitmq.exchange.notification}")
+    private String notificationExchange;
+
     @Value("${rabbitmq.routing-key.process-loan}")
     private String processLoanRoutingKey;
 
     @Value("${rabbitmq.queue.loan-approval}")
     private String loanApprovalQueue;
+
+    @Value("${rabbitmq.queue.loan-status}")
+    private String loanStatusQueue;
 
     @Value("${rabbitmq.routing-key.approve-loan}")
     private String approveLoanRoutingKey;
@@ -31,6 +37,10 @@ public class RabbitMQConfig {
 
     @Value("${rabbitmq.routing-key.disburse-loan}")
     private String disburseLoanRoutingKey;
+
+    @Value("${rabbitmq.routing-key.loan-status}")
+    private String loanStatusRoutingKey;
+
 
     @Bean
     public Queue loanProcessingQueue() {
@@ -48,8 +58,18 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue loanStatusQueue() {
+        return new Queue(loanStatusQueue, true);
+    }
+
+    @Bean
     public TopicExchange loanExchange() {
         return new TopicExchange(loanExchange);
+    }
+
+    @Bean
+    public TopicExchange notificationExchange() {
+        return new TopicExchange(notificationExchange);
     }
 
     @Bean
@@ -71,6 +91,13 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(loanDisbursementQueue())
                 .to(loanExchange())
                 .with(disburseLoanRoutingKey);
+    }
+
+    @Bean
+    public Binding bindLoanStatus() {
+        return BindingBuilder.bind(loanStatusQueue())
+                .to(notificationExchange())
+                .with(loanStatusRoutingKey);
     }
 
     @Bean
